@@ -58,13 +58,23 @@ def build_frames(img, amplitude=1.0):
     return frames, (w, h)
 
 
-def to_p_frame(frame, transparent_index=255):
-    """RGBA → P 模式（255 色 + 索引 transparent_index 作全透明），保住透明背景。"""
-    alpha = frame.getchannel("A")
-    mask = alpha.point(lambda a: 255 if a <= 16 else 0)  # 255 = 需要透明的像素
-    p = frame.convert("RGB").convert("P", palette=Image.ADAPTIVE, colors=255)
-    p.paste(transparent_index, mask)  # 透明像素统一指向保留索引
-    return p
+def to_p_frames(frames, transparent_index=255):
+    """RGBA 帧列表 → 共用调色板的 P 模式帧列表（保住透明背景）。
+
+    逐帧做自适应量化会得到互不相同的调色板，同一颜色在相邻帧映射到
+    不同索引，播放时表现为颜色漂移/闪烁——因此全部帧共用从首帧提取的
+    同一调色板（各帧都是同一原图的缩放，色彩分布一致），动画关闭抖动
+    避免噪点逐帧跳动。索引 transparent_index 保留给全透明像素。
+    """
+    rgbs = [f.convert("RGB") for f in frames]  # 丢弃 alpha 保留本色，边缘不发暗
+    palette = rgbs[0].quantize(colors=transparent_index, method=Image.MEDIANCUT)
+    p_frames = []
+    for rgb, frame in zip(rgbs, frames):
+        p = rgb.quantize(palette=palette, dither=Image.Dither.NONE)
+        mask = frame.getchannel("A").point(lambda a: 255 if a <= 16 else 0)
+        p.paste(transparent_index, mask)  # 全透明像素统一指向保留索引
+        p_frames.append(p)
+    return p_frames
 
 
 def distribute(total_cs, count):
@@ -79,7 +89,7 @@ def distribute(total_cs, count):
 def make_gif(in_path, out_path, total_ms=DEFAULT_TOTAL_MS, amplitude=1.0):
     img = Image.open(in_path)
     frames, _ = build_frames(img, amplitude=amplitude)
-    p_frames = [to_p_frame(f) for f in frames]
+    p_frames = to_p_frames(frames)
     # 相邻完全相同的帧会被 Pillow 合并（本动画的静止收尾帧），先自行去重，
     # 再把 0.5 秒精确分配到实际帧数——无论合并后剩几帧，总时长都保持不变。
     merged = [p_frames[0]]
