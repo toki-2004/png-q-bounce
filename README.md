@@ -4,7 +4,7 @@
 
 把一张 PNG 一次性做成 **Q 弹（果冻挤压回弹）GIF**：底部锚定的挤压 → 拉伸 → 衰减摇摆 → 静止，动画**只循环播放一遍**（播完停在原始画面），并保留透明背景。
 
-典型用途：给 [desktop-pet](../desktop-pet) 桌宠做互动动画皮肤——把静态 PNG 皮肤拖进来，得到可直接设置为 `pet_interact_image` 的单次播放 GIF。
+典型用途：给 [desktop-pet](https://github.com/toki-2004/desktop-pet) 桌宠做互动动画皮肤——把静态 PNG 皮肤拖进来，得到可直接设置为 `pet_interact_image` 的单次播放 GIF。
 
 ## 使用方法
 
@@ -16,6 +16,8 @@ python qbounce.py 皮肤.png --duration 40       # 更快的节奏（毫秒/帧�
 ```
 
 也可以直接把 PNG 拖到 `拖拽转换.bat` 上使用。
+
+单文件免安装版 exe 可在 [Releases](https://github.com/toki-2004/png-q-bounce/releases) 页面下载，无需安装 Python 环境。
 
 ## 参数
 

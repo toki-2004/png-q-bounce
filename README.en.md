@@ -22,6 +22,8 @@ python qbounce.py skin.png --duration 40       # faster timing (ms per frame)
 
 You can also drag a PNG onto `拖拽转换.bat`.
 
+A standalone `png-q-bounce.exe` is available on the [Releases](https://github.com/toki-2004/png-q-bounce/releases) page - no Python required.
+
 ## Options
 
 | Option | Default | Description |
