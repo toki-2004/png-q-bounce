@@ -28,13 +28,17 @@ A standalone `png-q-bounce.exe` is available on the [Releases](https://github.co
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `--duration` | 55 | Milliseconds per frame; lower is faster |
+| `--duration` | 40 | Milliseconds per frame (12 frames total 0.5 s); lower is faster |
 | `--amplitude` | 1.0 | Bounce intensity; 1.3 ≈ more dramatic, 0.6 ≈ subtler |
 
 ## How it works
 
-* 7 frames of decaying wobble: squash (wider) → stretch (taller bounce) →
-  settling back to the original size, anchored to the bottom edge.
+* 12 frames of decaying wobble (~0.5 s): squash (wider) → stretch (taller
+  bounce) → settling back to the original size, anchored to the bottom edge.
+* **The first frame matches the original resolution exactly**: the GIF canvas
+  equals the PNG size and frame 1 is a 1:1 copy of the original pixels;
+  wobble frames that extend past the canvas are cropped (sides on squash,
+  top on stretch).
 * **Plays once**: no GIF NETSCAPE loop extension is written, so browsers,
   image viewers and Qt QMovie stop on the last frame (the original image).
 * Transparency is preserved (reserved palette index + disposal=2), so the
