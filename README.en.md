@@ -29,12 +29,12 @@ A standalone `png-q-bounce.exe` is available on the [Releases](https://github.co
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `--duration` | 500 | Total animation duration in ms (exactly 0.5 s); lower is faster |
+| `--duration` | 300 | Total animation duration in ms (exactly 0.3 s); lower is faster |
 | `--amplitude` | 1.0 | Press depth; 1.2 ≈ deeper press, 0.7 ≈ subtler |
 
 ## How it works
 
-* 12 frames of single press-and-release (exactly 0.5 s total): bottom-anchored
+* 12 frames of single press-and-release (exactly 0.3 s total): bottom-anchored
   gentle press that smoothly returns to the original size - no repeated
   bouncing, no overshoot (trailing rest frames auto-merge).
 * **The first frame matches the original resolution exactly**: the GIF canvas
