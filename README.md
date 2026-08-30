@@ -1,5 +1,7 @@
 # png-q-bounce
 
+> **语言：** 简体中文 | [English](README.en.md)
+
 把一张 PNG 一次性做成 **Q 弹（果冻挤压回弹）GIF**：底部锚定的挤压 → 拉伸 → 衰减摇摆 → 静止，动画**只循环播放一遍**（播完停在原始画面），并保留透明背景。
 
 典型用途：给 [desktop-pet](../desktop-pet) 桌宠做互动动画皮肤——把静态 PNG 皮肤拖进来，得到可直接设置为 `pet_interact_image` 的单次播放 GIF。
