@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """png-q-bounce：把一张 PNG 做成"按钮式轻按回弹"的 GIF。
 
-动画模仿按钮交互：轻微按下（整体小幅缩小）→ 轻柔回弹（略过冲）→ 静止，
-居中缩放、幅度克制。**GIF 画布与原图分辨率完全一致，首帧即原图 1:1 像素**；
-动画共 12 帧、时长精确 0.5 秒，**只循环播放一遍**（不写入 NETSCAPE 循环扩展）。
+一次点击一次回弹：底部锚定，轻微按下（整体小幅缩小，顶部下沉）→ 平滑
+回到原尺寸静止，**没有反复回弹、没有过冲**。居中缩放、幅度克制。
+**GIF 画布与原图分辨率完全一致，首帧即原图 1:1 像素**；动画共 12 帧、
+时长精确 0.5 秒，**只循环播放一遍**（不写入 NETSCAPE 循环扩展）。
 
 用法：
     python qbounce.py input.png [-o output.gif] [--duration 500] [--amplitude 1.0]
@@ -17,42 +18,41 @@ import sys
 
 from PIL import Image
 
-# 12 帧：整体等比缩放（居中）。按压段缩到 0.95，回弹段带 1.005 的轻微过冲。
-# 首帧与末帧均为 (1,1)：首帧即原图 1:1，末帧静止收尾；相邻帧两两可分辨
-# （Pillow 会合并完全相同的相邻帧，因此末尾用 1px 级的微移过渡）。
+# 12 帧：一次"按下 → 回弹"，底部锚定（底边贴地不动，顶边下沉再抬起），
+# 无过冲、无反复回弹。首帧与末帧均为 (1,1)：首帧即原图 1:1，末帧静止收尾；
+# 回到原尺寸后的静止帧会被 Pillow 合并，帧时长按实际帧数精确分配（合计 0.5 秒）。
 WOBBLE = [
-    (1.000, 1.000, 0.000),
-    (0.990, 0.990, 0.000),
-    (0.965, 0.965, 0.000),
-    (0.950, 0.950, 0.000),   # 按压最低点
-    (0.970, 0.970, 0.000),
-    (0.990, 0.990, 0.000),
-    (1.005, 1.005, 0.000),   # 释放轻微过冲
-    (1.000, 1.000, 0.000),
-    (0.995, 0.995, 0.000),
-    (1.003, 1.003, 0.000),
-    (1.000, 1.000, -0.004),  # 1px 级微移：与末帧可分辨
-    (1.000, 1.000, 0.000),
+    (1.000, 1.000),
+    (0.975, 0.975),
+    (0.950, 0.950),
+    (0.930, 0.930),   # 按压最低点
+    (0.950, 0.950),
+    (0.970, 0.970),
+    (0.985, 0.985),
+    (0.995, 0.995),
+    (1.000, 1.000),
+    (1.000, 1.000),
+    (1.000, 1.000),
+    (1.000, 1.000),
 ]
-DEFAULT_TOTAL_MS = 500  # 12 帧合计时长（GIF 按 1/100 秒存储，逐帧分配凑满）
+DEFAULT_TOTAL_MS = 500  # 全部帧合计时长（GIF 按 1/100 秒存储，逐帧分配凑满）
 
 
 def build_frames(img, amplitude=1.0):
-    """返回 (帧列表, 画布尺寸)。画布=原图尺寸：首帧即原图 1:1 像素，
-    整体居中缩放，缩小帧四周留出透明边、放大帧对称裁切。"""
+    """返回 (帧列表, 画布尺寸)。画布=原图尺寸：首帧即原图 1:1 像素。
+    底部锚定：按压时顶边下沉、底边不动，因此任何帧都不会超出画布。"""
     img = img.convert("RGBA")
     w, h = img.size
     frames = []
-    for sx, sy, dy_ratio in WOBBLE:
+    for sx, sy in WOBBLE:
         sx = 1.0 + (sx - 1.0) * amplitude
         sy = 1.0 + (sy - 1.0) * amplitude
-        dy = dy_ratio * amplitude
         nw = max(1, int(round(w * sx)))
         nh = max(1, int(round(h * sy)))
         scaled = img.resize((nw, nh), Image.LANCZOS)
         frame = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-        x = (w - nw) // 2
-        y = (h - nh) // 2 + int(round(h * dy))
+        x = (w - nw) // 2  # 水平居中
+        y = h - nh         # 底部锚定：底边贴住画布底
         frame.paste(scaled, (x, y), scaled)
         frames.append(frame)
     return frames, (w, h)
@@ -80,7 +80,8 @@ def make_gif(in_path, out_path, total_ms=DEFAULT_TOTAL_MS, amplitude=1.0):
     img = Image.open(in_path)
     frames, _ = build_frames(img, amplitude=amplitude)
     p_frames = [to_p_frame(f) for f in frames]
-    # 相邻完全相同的帧会被 Pillow 合并，先自行去重，保证时长分配准确
+    # 相邻完全相同的帧会被 Pillow 合并（本动画的静止收尾帧），先自行去重，
+    # 再把 0.5 秒精确分配到实际帧数——无论合并后剩几帧，总时长都保持不变。
     merged = [p_frames[0]]
     for f in p_frames[1:]:
         if f.tobytes() != merged[-1].tobytes():
@@ -101,7 +102,7 @@ def main():
     ap.add_argument("--duration", type=int, default=DEFAULT_TOTAL_MS,
                     help="动画总时长毫秒数（默认 500）")
     ap.add_argument("--amplitude", type=float, default=1.0,
-                    help="按压幅度系数（默认 1.0，越大按压越深）")
+                    help="按压幅度系数（默认 1.0，越大按得越深）")
     args = ap.parse_args()
 
     if not os.path.isfile(args.input):

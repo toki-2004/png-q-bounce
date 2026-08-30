@@ -2,8 +2,9 @@
 
 > **Language:** English | [简体中文](README.md)
 
-Turn a single PNG into a **one-shot button-press GIF**: a gentle press-down
-(uniform scale) with a slight overshoot on release, scaling from the center.
+Turn a single PNG into a **one-shot button-press GIF**: bottom-anchored, a
+gentle press-down (the top sinks) that smoothly returns to the original
+size - one press, one release, no repeated bouncing. Transparency preserved.
 The animation **plays exactly once** (players stop on the final frame), and
 transparency is preserved.
 
@@ -29,12 +30,13 @@ A standalone `png-q-bounce.exe` is available on the [Releases](https://github.co
 | Option | Default | Description |
 | --- | --- | --- |
 | `--duration` | 500 | Total animation duration in ms (exactly 0.5 s); lower is faster |
-| `--amplitude` | 1.0 | Press depth; 1.3 ≈ deeper press, 0.6 ≈ subtler |
+| `--amplitude` | 1.0 | Press depth; 1.2 ≈ deeper press, 0.7 ≈ subtler |
 
 ## How it works
 
-* 12 frames of button-style press-and-release (exactly 0.5 s): uniform
-  center scaling with a slight overshoot on release.
+* 12 frames of single press-and-release (exactly 0.5 s total): bottom-anchored
+  gentle press that smoothly returns to the original size - no repeated
+  bouncing, no overshoot (trailing rest frames auto-merge).
 * **The first frame matches the original resolution exactly**: the GIF canvas
   equals the PNG size and frame 1 is a 1:1 copy of the original pixels.
 * **Plays once**: no GIF NETSCAPE loop extension is written, so browsers,
