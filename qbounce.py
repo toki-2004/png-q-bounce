@@ -4,10 +4,10 @@
 一次点击一次回弹：底部锚定，轻微按下（整体小幅缩小，顶部下沉）→ 平滑
 回到原尺寸静止，**没有反复回弹、没有过冲**。居中缩放、幅度克制。
 **GIF 画布与原图分辨率完全一致，首帧即原图 1:1 像素**；动画共 12 帧、
-时长精确 0.5 秒，**只循环播放一遍**（不写入 NETSCAPE 循环扩展）。
+时长精确 0.3 秒，**只循环播放一遍**（不写入 NETSCAPE 循环扩展）。
 
 用法：
-    python qbounce.py input.png [-o output.gif] [--duration 500] [--amplitude 1.0]
+    python qbounce.py input.png [-o output.gif] [--duration 300] [--amplitude 1.0]
 
 也支持把 PNG 直接拖到 拖拽转换.bat 上使用。
 """
@@ -35,7 +35,7 @@ WOBBLE = [
     (1.000, 1.000),
     (1.000, 1.000),
 ]
-DEFAULT_TOTAL_MS = 500  # 全部帧合计时长（GIF 按 1/100 秒存储，逐帧分配凑满）
+DEFAULT_TOTAL_MS = 300  # 全部帧合计时长（GIF 按 1/100 秒存储，逐帧分配凑满）
 
 
 def build_frames(img, amplitude=1.0):
@@ -110,7 +110,7 @@ def main():
     ap.add_argument("input", help="输入 PNG 路径")
     ap.add_argument("-o", "--output", help="输出 GIF 路径（默认同名 _q.gif）")
     ap.add_argument("--duration", type=int, default=DEFAULT_TOTAL_MS,
-                    help="动画总时长毫秒数（默认 500）")
+                    help="动画总时长毫秒数（默认 300）")
     ap.add_argument("--amplitude", type=float, default=1.0,
                     help="按压幅度系数（默认 1.0，越大按得越深）")
     args = ap.parse_args()
